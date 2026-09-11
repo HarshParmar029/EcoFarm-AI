@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Field%20Tested-success)]()
 
-**Arduino Physical AI Challenge India 2026** · Reg. `APC-2026-GJ-67702`
+**Arduino Physical AI Challenge India 2026** ·
 Track: **Industrial AI & Sustainability** · Solo Participant · Marwadi University, Rajkot
 
 [▶ Watch Demo Video](https://drive.google.com/file/d/1ffssasdDGP47N2glOk9EOX2IHYWHtLz_/view?usp=sharing) &nbsp;·&nbsp; [📄 Full Project Report](docs/EcoFarm_AI_APC2026_Report.pdf) &nbsp;·&nbsp; [🐛 Issues](../../issues)
