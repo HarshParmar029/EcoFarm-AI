@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EcoFarm AI</title>
+  <script src="libs/socket.io.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0F3D2E;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 60px 16px;
+    }
+    h1 { color: #F5A623; font-size: 1.8em; text-align: center; }
+    .sub { color: #AFC9BC; font-size: 13px; margin-bottom: 24px; text-align: center; }
+
+    .status-banner {
+      width: 100%;
+      max-width: 480px;
+      background: #14503C;
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    }
+    .status-banner .label { font-size: 12px; color: #AFC9BC; }
+    .status-banner .value { font-size: 1.1em; font-weight: bold; }
+    .status-banner.dry { border-left: 5px solid #B23A2E; }
+    .status-banner.medium { border-left: 5px solid #F5A623; }
+    .status-banner.wet { border-left: 5px solid #2E8B57; }
+
+    .grid {
+      width: 100%;
+      max-width: 480px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: #14503C;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    }
+    .card h3 {
+      font-size: 11px;
+      color: #AFC9BC;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .zone-value { font-size: 1.4em; font-weight: bold; margin-bottom: 8px; }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: #0d2e22;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    .full-card { grid-column: span 3; }
+
+    .env-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #1e6e50;
+      font-size: 14px;
+    }
+    .env-row:last-child { border-bottom: none; }
+    .env-row span:first-child { color: #AFC9BC; }
+    .env-row span:last-child { font-weight: bold; }
+
+    .pump-card {
+      width: 100%;
+      max-width: 480px;
+      background: #14503C;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      margin-bottom: 18px;
+    }
+    .pump-indicator {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 12px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      transition: all 0.3s;
+    }
+    .pump-indicator.on {
+      background: #2E8B57;
+      box-shadow: 0 0 30px rgba(46,139,87,0.6);
+    }
+    .pump-indicator.off { background: #4a1a1a; }
+    .pump-label { font-size: 1.2em; font-weight: bold; }
+    .pump-note { font-size: 12px; color: #AFC9BC; margin-top: 6px; margin-bottom: 16px; }
+
+    .btn-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 10px; }
+    button {
+      flex: 1;
+      padding: 14px 10px;
+      font-size: 1em;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.1s;
+    }
+    button:active { transform: scale(0.95); }
+    #btnOn, #btnLedOn  { background: #2E8B57; }
+    #btnOff, #btnLedOff { background: #B23A2E; }
+    #btnAuto, #btnLedAuto {
+      width: 100%;
+      background: #2E86AB;
+      padding: 12px;
+      font-size: 0.9em;
+    }
+
+    .section-divider { border: none; border-top: 1px solid #1e6e50; margin: 20px 0 16px 0; }
+
+    .section-title {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 1em; font-weight: bold; margin-bottom: 4px;
+    }
+    .section-status { font-size: 12px; color: #AFC9BC; margin-bottom: 14px; }
+    .section-status .dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px;
+    }
+    .section-status .dot.on { background: #B23A2E; }
+    .section-status .dot.off { background: #666; }
+
+    #btnBuzzer { width: 100%; background: #F5A623; padding: 12px; color: #0F3D2E; font-size: 0.9em; }
+
+    .scan-card {
+      width: 100%;
+      max-width: 480px;
+      background: #14503C;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      margin-bottom: 18px;
+    }
+    .scan-card h3 {
+      font-size: 12px; color: #AFC9BC; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 14px;
+    }
+    .file-btn {
+      display: inline-block; width: 100%; background: #2E86AB; color: #fff;
+      font-weight: bold; padding: 14px; border-radius: 12px; cursor: pointer; margin-bottom: 12px;
+    }
+    #photoInput { display: none; }
+    #photoPreview {
+      display: none; width: 100%; max-width: 240px; border-radius: 12px; margin: 0 auto 14px auto;
+    }
+    .scan-badge {
+      display: inline-block; padding: 6px 16px; border-radius: 20px;
+      font-weight: bold; font-size: 0.95em; margin-bottom: 10px;
+    }
+    .scan-badge.healthy { background: #2E8B57; }
+    .scan-badge.stressed { background: #F5A623; color: #0F3D2E; }
+    .scan-badge.diseased { background: #B23A2E; }
+    .scan-badge.error { background: #666; }
+    #scanResult { font-size: 13px; color: #DCEFE6; line-height: 1.5; }
+    #scanRatios { font-size: 11px; color: #AFC9BC; margin-top: 8px; }
+
+    .conn-row {
+      width: 100%; max-width: 480px; display: flex; justify-content: space-between;
+      font-size: 12px; color: #AFC9BC; padding-top: 8px;
+    }
+    .conn-row span:last-child { font-weight: bold; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>🌱 EcoFarm AI</h1>
+  <p class="sub">Live Field Dashboard — Web &amp; Mobile</p>
+
+  <div id="statusBanner" class="status-banner">
+    <div class="label">System Status</div>
+    <div id="statusValue" class="value">Loading...</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Zone 1</h3>
+      <div id="z1Value" class="zone-value">--%</div>
+      <div class="bar-track"><div id="z1Bar" class="bar-fill" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <h3>Zone 2</h3>
+      <div id="z2Value" class="zone-value">--%</div>
+      <div class="bar-track"><div id="z2Bar" class="bar-fill" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <h3>Zone 3</h3>
+      <div id="z3Value" class="zone-value">--%</div>
+      <div class="bar-track"><div id="z3Bar" class="bar-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Environment</h3>
+      <div class="env-row"><span>Air Temperature</span><span id="airTemp">-- °C</span></div>
+      <div class="env-row"><span>Soil Temperature</span><span id="soilTemp">-- °C</span></div>
+      <div class="env-row"><span>Humidity</span><span id="humidity">-- %</span></div>
+      <div class="env-row"><span>Pressure</span><span id="pressure">-- hPa</span></div>
+      <div class="env-row"><span>Light Level (LDR)</span><span id="lightValue">-- %</span></div>
+      <div class="env-row"><span>Rain</span><span id="rainStatus">--</span></div>
+      <div class="env-row"><span>Motion</span><span id="motionStatus">--</span></div>
+      <div class="env-row"><span>LoRa</span><span id="loraStatus">--</span></div>
+    </div>
+  </div>
+
+  <div class="pump-card">
+    <div id="pumpIndicator" class="pump-indicator off">💧</div>
+    <div id="pumpLabel" class="pump-label">PUMP OFF</div>
+    <div id="modeNote" class="pump-note">Mode: AUTO (based on soil moisture + rain)</div>
+
+    <div class="btn-row">
+      <button id="btnOn" onclick="pumpOn()">⚡ ON</button>
+      <button id="btnOff" onclick="pumpOff()">⛔ OFF</button>
+    </div>
+    <button id="btnAuto" onclick="autoMode()">↩ BACK TO AUTO</button>
+
+    <hr class="section-divider">
+
+    <div class="section-title">🔴 Red LED</div>
+    <div id="ledStatusText" class="section-status" style="margin-bottom:0;">
+      <span id="ledDot" class="dot off"></span><span id="ledStatusLabel">OFF</span> — follows pump/alerts automatically
+    </div>
+    <div id="ledModeNote" class="pump-note">Mode: AUTO</div>
+    <div class="btn-row">
+      <button id="btnLedOn" onclick="ledOn()">⚡ ON</button>
+      <button id="btnLedOff" onclick="ledOff()">⛔ OFF</button>
+    </div>
+    <button id="btnLedAuto" onclick="ledAuto()">↩ BACK TO AUTO</button>
+
+    <hr class="section-divider">
+
+    <button id="btnBuzzer" onclick="testBuzzer()">🔊 Test Buzzer</button>
+  </div>
+
+  <div class="scan-card">
+    <h3>🌿 Plant Health Scanner</h3>
+
+    <label for="photoInput" class="file-btn">📷 Take / Upload Leaf Photo</label>
+    <input type="file" id="photoInput" accept="image/*" capture="environment">
+
+    <img id="photoPreview" src="" alt="Leaf preview">
+
+    <div id="scanBadge" class="scan-badge" style="display:none;"></div>
+    <div id="scanResult">Take a photo of a leaf to check its health.</div>
+    <div id="scanRatios"></div>
+  </div>
+
+  <div class="conn-row">
+    <span>Connection</span>
+    <span id="connStatus">Connecting...</span>
+  </div>
+
+  <script>
+    const socket = io("http://" + window.location.host, { transports: ["websocket"] });
+
+    socket.on("connect", () => {
+      document.getElementById("connStatus").textContent = "Connected ✅";
+      socket.emit("get_state", {});
+    });
+
+    socket.on("disconnect", () => {
+      document.getElementById("connStatus").textContent = "Disconnected ❌";
+    });
+
+    socket.on("status", (data) => { updateUI(data); });
+
+    socket.on("photo_result", (result) => {
+      const badge = document.getElementById("scanBadge");
+      const resultBox = document.getElementById("scanResult");
+      const ratiosBox = document.getElementById("scanRatios");
+
+      badge.style.display = "inline-block";
+      badge.textContent = result.label;
+      badge.className = "scan-badge " + result.label.toLowerCase();
+
+      resultBox.innerHTML = `<b>${result.confidence_percent}% confidence</b><br>${result.advice}`;
+
+      if (result.green_ratio !== undefined) {
+        ratiosBox.textContent =
+          `Green: ${result.green_ratio}% · Yellow/Brown: ${result.yellow_brown_ratio}%`;
+      }
+    });
+
+    document.getElementById("photoInput").addEventListener("change", handlePhotoSelect);
+
+    function handlePhotoSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const img = new Image();
+        img.onload = function () {
+          const size = 300;
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, size, size);
+          const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
+          const preview = document.getElementById("photoPreview");
+          preview.src = resizedDataUrl;
+          preview.style.display = "block";
+
+          document.getElementById("scanResult").textContent = "Analyzing...";
+          document.getElementById("scanBadge").style.display = "none";
+          document.getElementById("scanRatios").textContent = "";
+
+          socket.emit("analyze_photo", { image: resizedDataUrl });
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function pumpOn()   { socket.emit("pump_on", {}); }
+    function pumpOff()  { socket.emit("pump_off", {}); }
+    function autoMode() { socket.emit("auto_mode", {}); }
+
+    function ledOn()   { socket.emit("led_on", {}); }
+    function ledOff()  { socket.emit("led_off", {}); }
+    function ledAuto() { socket.emit("led_auto", {}); }
+    function testBuzzer() { socket.emit("test_buzzer", {}); }
+
+    function zoneColor(value) {
+      if (value < 30) return "#B23A2E";
+      if (value < 60) return "#F5A623";
+      return "#2E8B57";
+    }
+
+    function setZone(prefix, value) {
+      const v = (value === null || value === undefined) ? 0 : value;
+      document.getElementById(prefix + "Value").textContent = v + "%";
+      const bar = document.getElementById(prefix + "Bar");
+      bar.style.width = v + "%";
+      bar.style.background = zoneColor(v);
+    }
+
+    function updateUI(data) {
+      setZone("z1", data.zone1);
+      setZone("z2", data.zone2);
+      setZone("z3", data.zone3);
+
+      const statusValue = document.getElementById("statusValue");
+      const statusBanner = document.getElementById("statusBanner");
+      statusValue.textContent = data.status || "Unknown";
+
+      statusBanner.classList.remove("dry", "medium", "wet");
+      if (data.status && data.status.toLowerCase().includes("dry")) {
+        statusBanner.classList.add("dry");
+      } else if (data.status && data.status.toLowerCase().includes("medium")) {
+        statusBanner.classList.add("medium");
+      } else {
+        statusBanner.classList.add("wet");
+      }
+
+      const pumpIndicator = document.getElementById("pumpIndicator");
+      const pumpLabel = document.getElementById("pumpLabel");
+      const modeNote = document.getElementById("modeNote");
+      if (data.pump) {
+        pumpIndicator.className = "pump-indicator on";
+        pumpLabel.textContent = "PUMP ON";
+      } else {
+        pumpIndicator.className = "pump-indicator off";
+        pumpLabel.textContent = "PUMP OFF";
+      }
+      modeNote.textContent = data.manual_mode
+        ? "Mode: MANUAL (you are controlling this)"
+        : "Mode: AUTO (based on soil moisture + rain)";
+
+      const ledDot = document.getElementById("ledDot");
+      const ledStatusLabel = document.getElementById("ledStatusLabel");
+      const ledModeNote = document.getElementById("ledModeNote");
+      if (data.led) {
+        ledDot.className = "dot on";
+        ledStatusLabel.textContent = "ON";
+      } else {
+        ledDot.className = "dot off";
+        ledStatusLabel.textContent = "OFF";
+      }
+      ledModeNote.textContent = data.led_manual_mode ? "Mode: MANUAL" : "Mode: AUTO";
+
+      const fmt = (v, digits = 1) =>
+        (v === null || v === undefined || isNaN(v)) ? "N/A" : Number(v).toFixed(digits);
+
+      document.getElementById("airTemp").textContent = fmt(data.air_temp) + " °C";
+      document.getElementById("soilTemp").textContent = fmt(data.soil_temp) + " °C";
+      document.getElementById("humidity").textContent = fmt(data.humidity) + " %";
+      document.getElementById("pressure").textContent = fmt(data.pressure, 0) + " hPa";
+      document.getElementById("lightValue").textContent =
+        (data.light_percent === null || data.light_percent === undefined ? "--" : data.light_percent) + " %";
+      document.getElementById("rainStatus").textContent = data.rain ? "Raining 🌧️" : "Dry ☀️";
+      document.getElementById("motionStatus").textContent = data.motion ? "Detected 🚨" : "Clear";
+      document.getElementById("loraStatus").textContent = data.lora_ready ? "Connected 📡" : "Not found";
+    }
+  </script>
+</body>
+</html>

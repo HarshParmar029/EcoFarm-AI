@@ -1,0 +1,16 @@
+profiles:
+  default:
+    fqbn:
+    platforms:
+      - platform: arduino:zephyr
+    libraries:
+      - Adafruit Unified Sensor (1.1.15)
+      - Adafruit BMP280 Library (3.0.0)
+      - dependency: Adafruit BusIO (1.17.4)
+      - OneWire (2.3.8)
+      - DallasTemperature (4.0.6)
+      - U8g2 (2.35.19)
+      - DHT sensor library (1.4.7)
+      - LoRa (0.8.0)
+
+default_profile: default

@@ -1,0 +1,6 @@
+name: EcoFarm AI
+description: "Sustainable precision irrigation, rain/motion sensing, and LoRa field alerts for smallholder farmers"
+ports: []
+bricks:
+- arduino:web_ui: {}
+icon: 🌱
