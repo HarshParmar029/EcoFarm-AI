@@ -354,7 +354,7 @@ No. Inference runs entirely on the UNO Q's Qualcomm Dragonwing MPU — no extern
 
 **Harsh Chandreshbhai Parmar**
 B.Tech ICT, Marwadi University, Rajkot, Gujarat · Founder & CEO, [KhetMitra](https://github.com/HarshParmar029)
-Registration ID `APC-2026-GJ-67702` · Arduino Physical AI Challenge India 2026 · Solo Participant
+· Arduino Physical AI Challenge India 2026 · Solo Participant
 
 *This project is my own original work — conceived, built, and tested independently. All performance claims are based on actual measurements on physical hardware.*
 
