@@ -68,9 +68,11 @@ Edge Impulse: https://studio.edgeimpulse.com/studio/1089108
 - [Author](#-author)
 
 ---
-##Video Files
-File 1: https://drive.google.com/file/d/1CMbb1EfmuYwqx4ZzVBugYKTJXO8z5u80/view?usp=sharing
+Video Files
 
+This folder contains demo and working videos for the EcoFarm AI project.
+
+File 1: [video-filename.mp4](https://drive.google.com/file/d/1CMbb1EfmuYwqx4ZzVBugYKTJXO8z5u80/view?usp=sharing)
 ## 🚨 The Problem
 
 India has **120+ million smallholder farmers**, most cultivating under two hectares, squeezed between two worsening crises:
