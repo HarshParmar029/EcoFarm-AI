@@ -78,6 +78,8 @@ This folder contains demo and working videos for the EcoFarm AI project.
 ## File 4: [video-filename_4.mp4](https://drive.google.com/file/d/1kINtVhcYfMw3HcXo9Q9GhOpdyjwGW8T9/view?usp=sharing)
 ## File 5: [video-filename_5.mp4](https://drive.google.com/file/d/1lPGWgMmAyIEIl1TxutXYXgn1AL1nbHFb/view?usp=sharing)
 
+## Watch Full Demo Video: https://drive.google.com/file/d/1ffssasdDGP47N2glOk9EOX2IHYWHtLz_/view?usp=sharing
+
 ## 🚨 The Problem
 
 India has **120+ million smallholder farmers**, most cultivating under two hectares, squeezed between two worsening crises:
