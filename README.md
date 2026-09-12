@@ -17,6 +17,9 @@ Track: **Industrial AI & Sustainability** · Solo Participant · Marwadi Univers
 
 [▶ Watch Demo Video](https://drive.google.com/file/d/1ffssasdDGP47N2glOk9EOX2IHYWHtLz_/view?usp=sharing) &nbsp;·&nbsp; [📄 Full Project Report](docs/EcoFarm_AI_APC2026_Report.pdf) &nbsp;·&nbsp; [🐛 Issues](../../issues)
 
+
+Edge Impulse: https://studio.edgeimpulse.com/studio/1089108
+
 </div>
 
 ---
