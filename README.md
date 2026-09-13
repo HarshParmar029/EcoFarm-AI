@@ -100,6 +100,10 @@ India has **120+ million smallholder farmers**, most cultivating under two hecta
 - 📡 Operates **fully offline** — critical for villages with poor connectivity
 - 📻 Broadcasts alerts to neighbouring farms via **LoRa radio** when action is needed
 
+![EcoFarm AI Circuit Schematic](docs/circuit-schematic.png)
+
+Full schematic (sensor legend, power rails, color-coded by function) shown above.
+
 ## 🏆 Why This Wins
 
 | What Judges Look For | How EcoFarm AI Delivers |
